@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Онлайн-запись на техосмотр - ГТОЦентр</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --accent: #e74c3c;
+        }
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background: #f5f7fa;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        header {
+            background: var(--primary);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .content {
+            display: flex;
+            padding: 0;
+        }
+        .calendar-section {
+            flex: 3;
+            padding: 20px;
+            border-right: 1px solid #eee;
+        }
+        .summary-section {
+            flex: 2;
+            padding: 20px;
+            background: #f9f9f9;
+        }
+        h2 {
+            color: var(--primary);
+            margin-top: 0;
+        }
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .calendar-nav button {
+            background: var(--secondary);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .week-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: var(--primary);
+        }
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+        }
+        .calendar-day {
+            height: 80px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 5px;
+            cursor: pointer;
+            position: relative;
+        }
+        .calendar-day:hover {
+            background: #e3f2fd;
+        }
+        .day-number {
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .slots-info {
+            font-size: 11px;
+            color: #666;
+            position: absolute;
+            bottom: 2px;
+            left: 5px;
+            right: 5px;
+        }
+        .free-slots { color: #27ae60; }
+        .busy-slots { color: #e74c3c; }
+        
+        .time-slots {
+            margin-top: 20px;
+        }
+        .time-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .time-slot {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            text-align: center;
+            cursor: pointer;
+        }
+        .time-slot:hover {
+            background: var(--secondary);
+            color: white;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 12px;
+            width: 100%;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        .btn:hover {
+            background: #c0392b;
+        }
+        .confirmation {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+            display: none;
+        }
+        .station-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .station-card {
+            flex: 1;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .station-card.selected {
+            border-color: var(--secondary);
+            background: #e3f2fd;
+        }
+        .station-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .station-address {
+            font-size: 12px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">ГТОЦентр</div>
+            <h1>Онлайн-запись на техосмотр</h1>
+        </header>
+        
+        <div class="content">
+            <div class="calendar-section">
+                <div class="station-selector">
+                    <div class="station-card selected" data-station="1">
+                        <div class="station-name">Центр на Литовской</div>
+                        <div class="station-address">ул. Литовская, д. 16</div>
+                    </div>
+                    <div class="station-card" data-station="2">
+                        <div class="station-name">Центр на Энгельса</div>
+                        <div class="station-address">пр. Энгельса, д. 154</div>
+                    </div>
+                    <div class="station-card" data-station="3">
+                        <div class="station-name">Всеволожский центр</div>
+                        <div class="station-address">г. Всеволожск, ул. Центральная, д. 1</div>
+                    </div>
+                </div>
+                
+                <div class="calendar-header">
+                    <h2>Июль 2024</h2>
+                    <div class="calendar-nav">
+                        <button id="prev-month">&lt; Назад</button>
+                        <button id="next-month">Вперед &gt;</button>
+                    </div>
+                </div>
+                
+                <div class="week-days">
+                    <div>Пн</div><div>Вт</div><div>Ср</div><div>Чт</div><div>Пт</div><div>Сб</div><div>Вс</div>
+                </div>
+                
+                <div class="calendar-grid" id="calendar">
+                    <!-- Calendar will be generated by JavaScript -->
+                </div>
+                
+                <div class="time-slots">
+                    <h3>Доступное время на <span id="selected-date">10 июля</span></h3>
+                    <div class="time-grid" id="time-slots">
+                        <div class="time-slot">09:00</div>
+                        <div class="time-slot">09:30</div>
+                        <div class="time-slot">10:00</div>
+                        <div class="time-slot">10:30</div>
+                        <div class="time-slot">11:00</div>
+                        <div class="time-slot">11:30</div>
+                        <div class="time-slot">12:00</div>
+                        <div class="time-slot">12:30</div>
+                        <div class="time-slot">13:00</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="summary-section">
+                <h2>Ваша запись</h2>
+                
+                <div class="summary-info">
+                    <p><strong>Пункт ТО:</strong> <span id="summary-station">Центр на Литовской</span></p>
+                    <p><strong>Адрес:</strong> <span id="summary-address">ул. Литовская, д. 16</span></p>
+                    <p><strong>Дата:</strong> <span id="summary-date">10 июля 2024</span></p>
+                    <p><strong>Время:</strong> <span id="summary-time">--:--</span></p>
+                </div>
+                
+                <div class="form-group">
+                    <label for="name">ФИО</label>
+                    <input type="text" id="name" placeholder="Иванов Иван Иванович">
+                </div>
+                
+                <div class="form-group">
+                    <label for="phone">Телефон</label>
+                    <input type="tel" id="phone" placeholder="+7 (999) 123-45-67">
+                </div>
+                
+                <div class="form-group">
+                    <label for="car-number">Госномер автомобиля</label>
+                    <input type="text" id="car-number" placeholder="А123БВ78">
+                </div>
+                
+                <div class="form-group">
+                    <label for="car-type">Тип транспортного средства</label>
+                    <select id="car-type">
+                        <option value="car">Легковой автомобиль</option>
+                        <option value="truck">Грузовой автомобиль</option>
+                        <option value="motorcycle">Мотоцикл</option>
+                        <option value="trailer">Прицеп</option>
+                        <option value="bus">Автобус</option>
+                    </select>
+                </div>
+                
+                <button class="btn" id="confirm-btn">Подтвердить запись</button>
+                
+                <div class="confirmation" id="confirmation">
+                    <h3>Запись успешно оформлена!</h3>
+                    <p>На ваш телефон отправлено SMS с подтверждением.</p>
+                    <p>Не забудьте взять с собой документы на день визита.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Станции ТО
+            const stations = {
+                1: { name: "Центр на Литовской", address: "ул. Литовская, д. 16" },
+                2: { name: "Центр на Энгельса", address: "пр. Энгельса, д. 154" },
+                3: { name: "Всеволожский центр", address: "г. Всеволожск, ул. Центральная, д. 1" }
+            };
+            
+            // Текущая дата
+            let currentDate = new Date();
+            let selectedDate = new Date();
+            let selectedTime = null;
+            let selectedStation = 1;
+            
+            // Элементы интерфейса
+            const calendarEl = document.getElementById('calendar');
+            const timeSlotsEl = document.getElementById('time-slots');
+            const prevMonthBtn = document.getElementById('prev-month');
+            const nextMonthBtn = document.getElementById('next-month');
+            const confirmBtn = document.getElementById('confirm-btn');
+            const confirmationEl = document.getElementById('confirmation');
+            const selectedDateEl = document.getElementById('selected-date');
+            const summaryStationEl = document.getElementById('summary-station');
+            const summaryAddressEl = document.getElementById('summary-address');
+            const summaryDateEl = document.getElementById('summary-date');
+            const summaryTimeEl = document.getElementById('summary-time');
+            
+            // Инициализация календаря
+            renderCalendar(currentDate);
+            updateTimeSlots();
+            updateStationInfo();
+            
+            // Навигация по месяцам
+            prevMonthBtn.addEventListener('click', () => {
+                currentDate.setMonth(currentDate.getMonth() - 1);
+                renderCalendar(currentDate);
+            });
+            
+            nextMonthBtn.addEventListener('click', () => {
+                currentDate.setMonth(currentDate.getMonth() + 1);
+                renderCalendar(currentDate);
+            });
+            
+            // Выбор станции
+            document.querySelectorAll('.station-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    document.querySelectorAll('.station-card').forEach(c => {
+                        c.classList.remove('selected');
+                    });
+                    card.classList.add('selected');
+                    selectedStation = parseInt(card.dataset.station);
+                    updateStationInfo();
+                });
+            });
+            
+            // Подтверждение записи
+            confirmBtn.addEventListener('click', () => {
+                const name = document.getElementById('name').value;
+                const phone = document.getElementById('phone').value;
+                
+                if (!name || !phone || !selectedTime) {
+                    alert('Пожалуйста, заполните все обязательные поля и выберите время');
+                    return;
+                }
+                
+                // Здесь будет отправка данных на сервер
+                confirmationEl.style.display = 'block';
+                confirmBtn.disabled = true;
+                
+                // Сброс формы через 3 секунды
+                setTimeout(() => {
+                    confirmationEl.style.display = 'none';
+                    confirmBtn.disabled = false;
+                    resetForm();
+                }, 3000);
+            });
+            
+            // Функции
+            function renderCalendar(date) {
+                calendarEl.innerHTML = '';
+                
+                const year = date.getFullYear();
+                const month = date.getMonth();
+                
+                // Заголовок с месяцем и годом
+                document.querySelector('.calendar-header h2').textContent = 
+                    new Date(year, month).toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' });
+                
+                // Первый день месяца
+                const firstDay = new Date(year, month, 1);
+                // Последний день месяца
+                const lastDay = new Date(year, month + 1, 0);
+                // День недели первого дня месяца (0 - воскресенье, 1 - понедельник и т.д.)
+                const firstDayOfWeek = firstDay.getDay() === 0 ? 7 : firstDay.getDay();
+                
+                // Заполняем пустые ячейки перед первым днем месяца
+                for (let i = 1; i < firstDayOfWeek; i++) {
+                    const emptyDay = document.createElement('div');
+                    emptyDay.className = 'calendar-day empty';
+                    calendarEl.appendChild(emptyDay);
+                }
+                
+                // Заполняем дни месяца
+                for (let day = 1; day <= lastDay.getDate(); day++) {
+                    const dayEl = document.createElement('div');
+                    dayEl.className = 'calendar-day';
+                    dayEl.dataset.date = `${year}-${String(month+1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                    
+                    const dayNumber = document.createElement('div');
+                    dayNumber.className = 'day-number';
+                    dayNumber.textContent = day;
+                    
+                    const slotsInfo = document.createElement('div');
+                    slotsInfo.className = 'slots-info';
+                    
+                    // Генерация случайного количества свободных/занятых слотов
+                    const freeSlots = Math.floor(Math.random() * 8);
+                    const busySlots = Math.floor(Math.random() * 5);
+                    
+                    slotsInfo.innerHTML = `
+                        <span class="free-slots">${freeSlots} свободно</span>
+                        <span class="busy-slots">${busySlots} занято</span>
+                    `;
+                    
+                    dayEl.appendChild(dayNumber);
+                    dayEl.appendChild(slotsInfo);
+                    
+                    // Выделение текущей выбранной даты
+                    if (day === selectedDate.getDate() && 
+                        month === selectedDate.getMonth() && 
+                        year === selectedDate.getFullYear()) {
+                        dayEl.classList.add('selected');
+                    }
+                    
+                    // Обработчик выбора даты
+                    dayEl.addEventListener('click', () => {
+                        document.querySelectorAll('.calendar-day').forEach(d => {
+                            d.classList.remove('selected');
+                        });
+                        dayEl.classList.add('selected');
+                        
+                        selectedDate = new Date(year, month, day);
+                        updateTimeSlots();
+                        updateSummary();
+                    });
+                    
+                    calendarEl.appendChild(dayEl);
+                }
+            }
+            
+            function updateTimeSlots() {
+                timeSlotsEl.innerHTML = '';
+                
+                // Обновляем заголовок с выбранной датой
+                selectedDateEl.textContent = selectedDate.toLocaleDateString('ru-RU', {
+                    day: 'numeric',
+                    month: 'long'
+                });
+                
+                // Генерируем временные слоты (каждые 30 минут с 9:00 до 18:00)
+                for (let hour = 9; hour < 18; hour++) {
+                    for (let minute = 0; minute < 60; minute += 30) {
+                        const timeSlot = document.createElement('div');
+                        timeSlot.className = 'time-slot';
+                        timeSlot.textContent = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+                        
+                        // Случайным образом помечаем некоторые слоты как занятые
+                        if (Math.random() > 0.7) {
+                            timeSlot.classList.add('busy');
+                            timeSlot.innerHTML += '<br><small>занято</small>';
+                            timeSlot.style.opacity = '0.6';
+                        } else {
+                            timeSlot.addEventListener('click', () => {
+                                document.querySelectorAll('.time-slot').forEach(slot => {
+                                    slot.classList.remove('selected');
+                                });
+                                timeSlot.classList.add('selected');
+                                selectedTime = timeSlot.textContent.split('\n')[0];
+                                updateSummary();
+                            });
+                        }
+                        
+                        timeSlotsEl.appendChild(timeSlot);
+                    }
+                }
+            }
+            
+            function updateStationInfo() {
+                const station = stations[selectedStation];
+                summaryStationEl.textContent = station.name;
+                summaryAddressEl.textContent = station.address;
+            }
+            
+            function updateSummary() {
+                summaryDateEl.textContent = selectedDate.toLocaleDateString('ru-RU', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric'
+                });
+                
+                if (selectedTime) {
+                    summaryTimeEl.textContent = selectedTime;
+                }
+            }
+            
+            function resetForm() {
+                document.getElementById('name').value = '';
+                document.getElementById('phone').value = '';
+                document.getElementById('car-number').value = '';
+                document.querySelectorAll('.time-slot.selected').forEach(el => {
+                    el.classList.remove('selected');
+                });
+                selectedTime = null;
+                summaryTimeEl.textContent = '--:--';
+            }
+        });
+    </script>
+</body>
+</html>
